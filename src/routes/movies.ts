@@ -4,10 +4,10 @@ import { movieCreate, movieList, movieGetById, movieUpdate, movieDelete } from '
 
 const router = Router();
 
-router.post('/', movieCreate);
-router.get('/', movieList);
-router.get('/:id', movieGetById);
-router.put('/:id', movieUpdate);
-router.delete('/:id', movieDelete);
+router.post('/movies', movieCreate);
+router.get('/movies', movieList);
+router.get('/movies/:id', movieGetById);
+router.put('/movies/:id', movieUpdate);
+router.delete('/movies/:id', movieDelete);
 
 export default router;
