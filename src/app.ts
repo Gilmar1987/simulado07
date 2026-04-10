@@ -13,12 +13,15 @@ app.get('/', (req, res) => {
 });
 // Importando as rotas
 
-app.use('/api', router);
+app.use('/api', router, (req, res) => {
+  
+  res.send('Rota de filmes acessada com sucesso !!! 🎬');
+});
 
 // ESTA PARTE É ESSENCIAL:
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
   //Passar data e hora atual
   console.log(`Data e hora atual: ${new Date().toLocaleString()}`);
-  console.info('API Simulado07 iniciada....'); // Log de informação
+  console.info('API Simulado07 iniciada ....'); // Log de informação
 });
