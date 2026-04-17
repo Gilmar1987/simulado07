@@ -1,6 +1,6 @@
 //Rotas para os endpoints da API
 import { Router } from 'express';
-import { movieCreate, movieList, movieGetById, movieUpdate, movieDelete } from '../controllers/Movie.Controllers';
+import { movieCreate, movieList, movieGetById, movieUpdate, movieDelete } from '../controllers/Movie.Controllers.js';
 
 const router = Router();
 

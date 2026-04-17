@@ -1,15 +1,22 @@
 import express from 'express';
 import 'dotenv/config';
-import router from './routes/movies';
+import router from './routes/Movies.Router.js';
+import swaggerUi from 'swagger-ui-express';
+
+import swaggerFile from '../swagger-output.json' with { type: 'json' };
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+// 1. Configuração da Rota do Swagger
+// Acesse http://localhost:3000/doc para testar os endpoints
+app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 // Rota de teste
 app.get('/', (req, res) => {
-  res.send('API Simulado07 Carregada com Sucesso! 🚀');
+   /* #swagger.ignore = true */
+  res.redirect('/doc'); // Redireciona para a documentação do Swagger
 });
 // Importando as rotas
 

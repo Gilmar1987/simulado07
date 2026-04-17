@@ -3,7 +3,8 @@ import { Request, Response } from 'express';
 
 
 /*
-Entidade: Movie
+Entidade: 
+ Movie
 Atributos:
 ● id
 ● title
@@ -32,10 +33,10 @@ let currentId: number = 1; // Variável para controlar o ID atual
 export const movieCreate = (req: Request, res: Response) => {
     const { title, description, year, genres, image, video } = req.body;
     const ExistingMovie = movies.some(m => m.title.toLocaleUpperCase().replace(/\s/g, '') === title.toLocaleUpperCase().replace(/\s/g, ''));
-    if (ExistingMovie) 
-        return res.status(400).json({ message: 'Movie already exists' });
+    if (ExistingMovie)
+        return res.status(409).json({ message: 'Movie already exists' });
     const newMovie = {
-        id: currentId ++, // Incrementa o ID para o próximo filme
+        id: currentId++, // Incrementa o ID para o próximo filme
         title,
         description,
         year,
@@ -49,15 +50,13 @@ export const movieCreate = (req: Request, res: Response) => {
 
 // Listar todos os usuários
 export const movieList = (req: Request, res: Response) => {
-    if (movies.length === 0) {
-        return res.status(200).json({ message: 'No movies found' });
-    }
+    
     res.status(200).json(movies);
 };
 
 // Obter um usuário por ID
 export const movieGetById = (req: Request, res: Response) => {
-   
+
     const id = Number(req.params.id);
     if (isNaN(id)) return res.status(400).json({ message: 'ID inválido' });
 
@@ -71,15 +70,30 @@ export const movieGetById = (req: Request, res: Response) => {
 
 // Atualizar um usuário por ID
 export const movieUpdate = (req: Request, res: Response) => {
-    
+
     const id = Number(req.params.id);
     if (isNaN(id)) return res.status(400).json({ message: 'ID inválido' });
 
     const { title, description, year, genres, image, video } = req.body;
+
+    //Filtrar o bory para não aceitar campos vazios, nulos ou "any"
+    const updates = Object.fromEntries(Object.entries({
+        title, description, year, genres, image, video
+    }).
+        filter(([_, value]) => value !== undefined && value !== null && value !== 'any'));
+
+    // Verificar se o título atualizado já existe em outro filme
+    if (updates.title) {
+        const existingMovie = movies.some(m => m.id !== id && m.title.toLocaleUpperCase().replace(/\s/g, '') === updates.title.toLocaleUpperCase().replace(/\s/g, ''));
+        if (existingMovie) {
+            return res.status(409).json({ message: 'Movie with this title already exists' });
+        }
+    }
+
     const movieIndex = movies.findIndex(u => u.id === id);
     if (movieIndex !== -1) {
-        
-        movies[movieIndex] = { ...movies[movieIndex], ...req.body, id }; // o id no fim garante que não mudem o ID
+
+        movies[movieIndex] = { ...movies[movieIndex], ...updates, id }; // o id no fim garante que não mudem o ID
 
         res.status(200).json(movies[movieIndex]);
     } else {
@@ -89,7 +103,7 @@ export const movieUpdate = (req: Request, res: Response) => {
 
 // Deletar um usuário por ID
 export const movieDelete = (req: Request, res: Response) => {
-    
+
     const id = Number(req.params.id);
     if (isNaN(id)) return res.status(400).json({ message: 'ID inválido' });
 

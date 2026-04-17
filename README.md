@@ -1,4 +1,5 @@
 # Simulado07
+# Autor: Gilmar Rodrigues Campelo
 
 API Node.js + Express em TypeScript para gerenciamento de filmes.
 
@@ -79,9 +80,108 @@ As rotas são definidas em `src/routes/movies.ts` e montadas em `src/app.ts` com
 
 ## Como testar no Thunder Client
 
-1. `GET http://localhost:3000/`
-2. `POST http://localhost:3000/api/movies` com body JSON para criar um filme
-3. `GET http://localhost:3000/api/movies`
-4. `GET http://localhost:3000/api/movies/1`
-5. `PUT http://localhost:3000/api/movies/1`
-6. `DELETE http://localhost:3000/api/movies/1`
+
+1. `POST http://localhost:3000/api/movies` com body JSON para criar um filme
+2. `GET http://localhost:3000/api/movies`
+3. `GET http://localhost:3000/api/movies/id:`
+4. `PUT http://localhost:3000/api/movies/id:`
+5. `DELETE http://localhost:3000/api/movies/id:`
+
+
+TEste com o Swagger
+1. `http://localhost:3000` para acessar a documentação Swagger UI.
+
+
+
+Curl
+
+curl -X 'GET' \
+  'http://localhost:3000/api/movies' \
+  -H 'accept: application/json'
+  
+Request URL
+http://localhost:3000/api/movies
+Server response
+Code	Details
+200	
+Response body
+Download
+[
+  {
+    "id": 1,
+    "title": "Batman: Batmam Liga da Justiça 01 ",
+    "description": "Quando a ameaça conhecida como o Coringa surge de seu passado, ele causa estragos e caos no povo de Gotham.",
+    "year": 2015,
+    "genres": "Action, Crime, Drama",
+    "image": "https://tmdb.org",
+    "video": "https://youtube.com"
+  },
+  {
+    "id": 2,
+    "title": "Batman: Batmam Liga da Justiça 02 ",
+    "description": "Quando a ameaça conhecida como o Coringa surge de seu passado, ele causa estragos e caos no povo de Gotham.",
+    "year": 2015,
+    "genres": "Action, Crime, Drama",
+    "image": "https://tmdb.org",
+    "video": "https://youtube.com"
+  },
+  {
+    "id": 3,
+    "title": "Batman: Batmam Liga da Justiça 03 ",
+    "description": "Quando a ameaça conhecida como o Coringa surge de seu passado, ele causa estragos e caos no povo de Gotham.",
+    "year": 2015,
+    "genres": "Action, Crime, Drama",
+    "image": "https://tmdb.org",
+    "video": "https://youtube.com"
+  },
+  {
+    "id": 4,
+    "title": "Batman: Batmam Liga da Justiça 05 ",
+    "description": "Quando a ameaça conhecida como o Coringa surge de seu passado, ele causa estragos e caos no povo de Gotham.",
+    "year": 2015,
+    "genres": "Action, Crime, Drama",
+    "image": "https://tmdb.org",
+    "video": "https://youtube.com"
+  },
+  {
+    "id": 5,
+    "title": "Batman: Batmam Liga da Justiça 06 ",
+    "description": "Quando a ameaça conhecida como o Coringa surge de seu passado, ele causa estragos e caos no povo de Gotham.",
+    "year": 2015,
+    "genres": "Action, Crime, Drama",
+    "image": "https://tmdb.org",
+    "video": "https://youtube.com"
+  },
+  {
+    "id": 6,
+    "title": "Batman: Batmam Liga da Justiça 07 ",
+    "description": "Quando a ameaça conhecida como o Coringa surge de seu passado, ele causa estragos e caos no povo de Gotham.",
+    "year": 2015,
+    "genres": "Action, Crime, Drama",
+    "image": "https://tmdb.org",
+    "video": "https://youtube.com"
+  },
+  {
+    "id": 7,
+    "title": "Batman: Batmam Liga da Justiça TESTE 07 ",
+    "description": "Quando a ameaça conhecida como o Coringa surge de seu passado, ele causa estragos e caos no povo de Gotham.",
+    "year": 2015,
+    "genres": "Action, Crime, Drama",
+    "image": "https://tmdb.org",
+    "video": "https://youtube.com"
+  }
+]
+
+Response headers
+ connection: keep-alive 
+ content-length: 1974 
+ content-type: application/json; charset=utf-8 
+ date: Fri,10 Apr 2026 20:50:56 GMT 
+ etag: W/"7b6-lzS6k7FmfpMmF6CJ5Pwf4Rp7PxQ" 
+ keep-alive: timeout=5 
+ x-powered-by: Express 
+
+Responses
+Code	Description
+200	
+OK
