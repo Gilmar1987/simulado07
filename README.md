@@ -1,13 +1,15 @@
 # Simulado07
 # Autor: Gilmar Rodrigues Campelo
 
-API Node.js + Express em TypeScript para gerenciamento de filmes.
+API Node.js + Express em TypeScript para gerenciamento de filmes com persistência em MongoDB Atlas.
 
 ## Estrutura do projeto
 
 - `src/app.ts` - ponto de entrada da aplicação
-- `src/routes/movies.ts` - rotas da API para filmes
-- `src/controllers/Movie.Controllers.ts` - lógica de CRUD em memória
+- `src/routes/Movies.Router.ts` - rotas da API para filmes
+- `src/controllers/Movie.Controllers.ts` - lógica de CRUD com MongoDB
+- `src/model/modelMovie.ts` - schema e model Mongoose
+- `src/config/dbMongo.ts` - conexão com o MongoDB
 
 ## Tecnologias
 
@@ -16,6 +18,9 @@ API Node.js + Express em TypeScript para gerenciamento de filmes.
 - TypeScript
 - tsx
 - dotenv
+- Mongoose
+- MongoDB Atlas
+- Swagger UI
 
 ## Instalação
 
@@ -25,7 +30,14 @@ API Node.js + Express em TypeScript para gerenciamento de filmes.
 npm install
 ```
 
-2. Inicie o servidor em modo desenvolvimento:
+2. Configure as variáveis de ambiente criando um arquivo `.env` na raiz do projeto (use `.env.exemplo` como base):
+
+```bash
+PORT=3000
+MONGODB_URI=mongodb+srv://<usuario>:<senha>@<cluster>.mongodb.net/?appName=<appName>
+```
+
+3. Inicie o servidor em modo desenvolvimento:
 
 ```bash
 npm run dev
@@ -33,16 +45,25 @@ npm run dev
 
 O servidor deve iniciar em `http://localhost:3000`.
 
+## Banco de Dados
+
+- MongoDB Atlas (cloud)
+- A conexão é feita via `MONGODB_URI` definida no `.env`
+- Os dados são persistidos no banco, não se perdem ao reiniciar o servidor
+- O campo `titleNormalized` garante que títulos duplicados (ex: `Tudo Bem` e `tudobem`) sejam rejeitados
+- O campo `isDeleted` e `deletedAt` estão preparados para soft delete
+- Timestamps automáticos: `createdAt` e `updatedAt`
+
 ## Endpoints
 
-### Rota de status
+### Documentação Swagger
 
-- `GET /`
-- Retorna uma mensagem de confirmação de que a API foi carregada.
+- `GET /` - Redireciona para a documentação Swagger UI em `/doc`
+- `GET /doc` - Documentação interativa Swagger UI
 
 ### CRUD de filmes
 
-As rotas são definidas em `src/routes/movies.ts` e montadas em `src/app.ts` como `/api`, portanto o caminho completo é `http://localhost:3000/api/movies`.
+As rotas são definidas em `src/routes/Movies.Router.ts` e montadas em `src/app.ts` como `/api`.
 
 - `POST /api/movies`
   - Cria um novo filme.
@@ -63,7 +84,7 @@ As rotas são definidas em `src/routes/movies.ts` e montadas em `src/app.ts` com
   - Lista todos os filmes.
 
 - `GET /api/movies/:id`
-  - Retorna o filme com o ID informado.
+  - Retorna o filme com o ID informado (MongoDB `_id`).
 
 - `PUT /api/movies/:id`
   - Atualiza o filme com o ID informado.
@@ -72,116 +93,28 @@ As rotas são definidas em `src/routes/movies.ts` e montadas em `src/app.ts` com
 - `DELETE /api/movies/:id`
   - Remove o filme com o ID informado.
 
-## Observações
-
-- Os dados são armazenados em memória (`src/controllers/Movie.Controllers.ts`).
-- Ao reiniciar o servidor, a lista de filmes volta ao estado inicial vazio.
-- A aplicação usa módulos ES (`"type": "module"` no `package.json`).
-
 ## Como testar no Thunder Client
-
 
 1. `POST http://localhost:3000/api/movies` com body JSON para criar um filme
 2. `GET http://localhost:3000/api/movies`
-3. `GET http://localhost:3000/api/movies/id:`
-4. `PUT http://localhost:3000/api/movies/id:`
-5. `DELETE http://localhost:3000/api/movies/id:`
+3. `GET http://localhost:3000/api/movies/:id`
+4. `PUT http://localhost:3000/api/movies/:id`
+5. `DELETE http://localhost:3000/api/movies/:id`
 
+## Teste com o Swagger
 
-TEste com o Swagger
-1. `http://localhost:3000` para acessar a documentação Swagger UI.
+Acesse `http://localhost:3000/doc` para abrir a documentação Swagger UI e testar os endpoints interativamente.
 
+## Curl
 
-
-Curl
-
+```bash
 curl -X 'GET' \
   'http://localhost:3000/api/movies' \
   -H 'accept: application/json'
-  
-Request URL
-http://localhost:3000/api/movies
-Server response
-Code	Details
-200	
-Response body
-Download
-[
-  {
-    "id": 1,
-    "title": "Batman: Batmam Liga da Justiça 01 ",
-    "description": "Quando a ameaça conhecida como o Coringa surge de seu passado, ele causa estragos e caos no povo de Gotham.",
-    "year": 2015,
-    "genres": "Action, Crime, Drama",
-    "image": "https://tmdb.org",
-    "video": "https://youtube.com"
-  },
-  {
-    "id": 2,
-    "title": "Batman: Batmam Liga da Justiça 02 ",
-    "description": "Quando a ameaça conhecida como o Coringa surge de seu passado, ele causa estragos e caos no povo de Gotham.",
-    "year": 2015,
-    "genres": "Action, Crime, Drama",
-    "image": "https://tmdb.org",
-    "video": "https://youtube.com"
-  },
-  {
-    "id": 3,
-    "title": "Batman: Batmam Liga da Justiça 03 ",
-    "description": "Quando a ameaça conhecida como o Coringa surge de seu passado, ele causa estragos e caos no povo de Gotham.",
-    "year": 2015,
-    "genres": "Action, Crime, Drama",
-    "image": "https://tmdb.org",
-    "video": "https://youtube.com"
-  },
-  {
-    "id": 4,
-    "title": "Batman: Batmam Liga da Justiça 05 ",
-    "description": "Quando a ameaça conhecida como o Coringa surge de seu passado, ele causa estragos e caos no povo de Gotham.",
-    "year": 2015,
-    "genres": "Action, Crime, Drama",
-    "image": "https://tmdb.org",
-    "video": "https://youtube.com"
-  },
-  {
-    "id": 5,
-    "title": "Batman: Batmam Liga da Justiça 06 ",
-    "description": "Quando a ameaça conhecida como o Coringa surge de seu passado, ele causa estragos e caos no povo de Gotham.",
-    "year": 2015,
-    "genres": "Action, Crime, Drama",
-    "image": "https://tmdb.org",
-    "video": "https://youtube.com"
-  },
-  {
-    "id": 6,
-    "title": "Batman: Batmam Liga da Justiça 07 ",
-    "description": "Quando a ameaça conhecida como o Coringa surge de seu passado, ele causa estragos e caos no povo de Gotham.",
-    "year": 2015,
-    "genres": "Action, Crime, Drama",
-    "image": "https://tmdb.org",
-    "video": "https://youtube.com"
-  },
-  {
-    "id": 7,
-    "title": "Batman: Batmam Liga da Justiça TESTE 07 ",
-    "description": "Quando a ameaça conhecida como o Coringa surge de seu passado, ele causa estragos e caos no povo de Gotham.",
-    "year": 2015,
-    "genres": "Action, Crime, Drama",
-    "image": "https://tmdb.org",
-    "video": "https://youtube.com"
-  }
-]
+```
 
-Response headers
- connection: keep-alive 
- content-length: 1974 
- content-type: application/json; charset=utf-8 
- date: Fri,10 Apr 2026 20:50:56 GMT 
- etag: W/"7b6-lzS6k7FmfpMmF6CJ5Pwf4Rp7PxQ" 
- keep-alive: timeout=5 
- x-powered-by: Express 
+## Observações
 
-Responses
-Code	Description
-200	
-OK
+- Os dados são persistidos no MongoDB Atlas.
+- A aplicação usa módulos ES (`"type": "module"` no `package.json`).
+- O arquivo `.env` não deve ser commitado. Use `.env.exemplo` como referência.
