@@ -90,8 +90,59 @@ As rotas são definidas em `src/routes/Movies.Router.ts` e montadas em `src/app.
   - Atualiza o filme com o ID informado.
   - Envie apenas os campos que deseja alterar no body JSON.
 
-- `DELETE /api/movies/:id`
-  - Remove o filme com o ID informado.
+- `SOFT DELETE /api/movies/:id`
+- Remove o filme com o ID informado.
+_id
+69f127da9f28f6135325a311
+title
+"Star Wars"
+titleNormalized
+"STARWARS"
+description
+"Quando a ameaça conhecida como o Coringa surge de seu passado, ele cau…"
+year
+1977
+genres
+"Action, Crime, Drama"
+image
+"https://tmdb.org"
+video
+"https://youtube.com"
+isDeleted
+false
+# deletedAt null
+createdAt
+2026-04-28T21:34:18.854+00:00
+updatedAt
+2026-04-28T21:34:18.854+00:00
+__v
+0
+_id
+69f128349f28f6135325a312
+title
+"Star Wars O Imperio Contra Ataca"
+titleNormalized
+"STARWARSOIMPERIOCONTRAATACA"
+description
+"Quando a ameaça conhecida como o Coringa surge de seu passado, ele cau…"
+year
+1980
+genres
+"Action, Crime, Drama"
+image
+"https://tmdb.org"
+video
+"https://youtube.com"
+isDeleted
+true
+# deletedAt  2026-04-29T18:10:31.136+00:00
+createdAt
+2026-04-28T21:35:48.959+00:00
+updatedAt
+2026-04-29T18:10:31.137+00:00
+__v
+0
+  
 
 ## Como testar no Thunder Client
 

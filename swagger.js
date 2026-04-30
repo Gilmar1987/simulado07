@@ -11,7 +11,7 @@ const doc = {
 const outputFile = './swagger-output.json';
 // Note que aqui apontei para o seu app.ts dentro da pasta src, 
 // baseando-se no seu 'ls' que mostrou uma pasta /src
-const endpointsFiles = ['./src/app.ts']; 
+const endpointsFiles = ['./src/routes/index.ts'];
 
 //swaggerAutogen()(outputFile, endpointsFiles).then(() => {
   //  console.log("✅ Arquivo swagger-output.json gerado!");

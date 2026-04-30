@@ -1,6 +1,6 @@
 import express from 'express';
 import 'dotenv/config';
-import router from './routes/movies.Router.js';
+import router from './routes/index.js';
 
 import swaggerUi from 'swagger-ui-express';
 
@@ -24,14 +24,9 @@ app.get('/', (req, res) => {
 });
 // Importando as rotas
 
-app.use('/api', router, (req, res) => {
-  
-  res.send('Rota de filmes acessada com sucesso !!! 🎬');
-});
+app.use('/api', router);
 
-connectDB(); // Conecta ao MongoDB
 
-// ESTA PARTE É ESSENCIAL:
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
   //Passar data e hora atual
