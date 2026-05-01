@@ -1,96 +1,77 @@
+import { movieService } from "../services/movie.service.js";
 import { Request, Response } from 'express';
-import Movie from '../model/movie.Model.js';
-import { movieSchema } from '../schemas/movieSchema.js';
+import { movieSchema } from "../schemas/movieSchema.js";
+import { isValidObjectId } from 'mongoose';
 
-const normalize = (str: string) => str.toUpperCase().replace(/\s+/g, '');
 
-// Criar um novo filme
-export const movieCreate = async (req: Request, res: Response) => {
-    const validatedData = movieSchema.parse(req.body);
-    const { title, description, year, genres, image, video } = validatedData;
-    const titleNormalized = normalize(title);
-    const existing = await Movie.findOne({ titleNormalized });
-    if (existing)
-        return res.status(409).json({ message: 'Movie already exists' });
-    try {
-        const newMovie = await Movie.create({ title, titleNormalized, description, year, genres, image, video });
-        res.status(201).json(newMovie);
-    } catch (error: any) {
-        if (error.name === 'CastError')
-            return res.status(400).json({ message: 'Invalid data format' });
-        res.status(500).json({ message: 'Internal server error', error });
-    }
-};
+export const movieController = {
+    createMovie: async (req: Request, res: Response) => {
+        // #swagger.parameters['body'] = { schema: { $ref: '#/definitions/Movie' } }
+        try {
+            const validatedData = movieSchema.parse(req.body);
+            const { title, description, year, genres, image, video } = validatedData;
+            const movie = await movieService.create(title, description, year, genres, image, video);
+            res.status(201).json(movie);
+        } catch (error) {
+            if (error instanceof Error)
+                return res.status(400).json({ error: 'Invalid data format' });
+            res.status(500).json({ error: (error as Error).message });
+        }
+    },
 
-// Listar todos os filmes
-export const movieList = async (req: Request, res: Response) => {
-    try {
-        const movies = await Movie.find();
-        res.status(200).json(movies);
-    } catch (error) {
-        res.status(500).json({ message: 'Internal server error', error });
-    }
-};
+    getAllMovies: async (req: Request, res: Response) => {
+        try {
+            const movies = await movieService.getAll();
+            res.status(200).json(movies);
+        } catch (error) {
+            return res.status(500).json({ error: (error as Error).message });
+        }
+    },
 
-// Obter um filme por ID
-export const movieGetById = async (req: Request, res: Response) => {
-    try {
-        const movie = await Movie.findById(req.params.id);
-        if (!movie)
-            return res.status(404).json({ message: 'Movie not found' });
-        res.status(200).json(movie);
-    } catch (error: any) {
-        if (error.name === 'CastError')
-            return res.status(400).json({ message: 'Invalid ID format' });
-        res.status(500).json({ message: 'Internal server error', error });
-    }
-};
+    getByIdMovie: async (req: Request, res: Response) => {
+        try {
+            const id = req.params.id as string;
+            if (!isValidObjectId(id))
+                return res.status(400).json({ message: 'Invalid movie ID format' });
+            const movie = await movieService.getById(id);
+            res.status(200).json(movie);
+        } catch (error) {
+            if (error instanceof Error)
+                return res.status(404).json({ error: (error as Error).message });
+            res.status(500).json({ message: 'Internal server error', error: (error as Error).message });
+        }
+    },
 
-// Atualizar um filme por ID
-export const movieUpdate = async (req: Request, res: Response) => {
-    const validatedData = movieSchema.partial().parse(req.body);
-    const { title, description, year, genres, image, video } = validatedData;
+    updateMovie: async (req: Request, res: Response) => {
+        // #swagger.parameters['body'] = { schema: { $ref: '#/definitions/Movie' } }
+        try {
+            const id = req.params.id as string;
+            if (!isValidObjectId(id))
+                return res.status(400).json({ message: 'Invalid movie ID format' });
+            const validatedData = movieSchema.partial().parse(req.body);
+            const { title, description, year, genres, image, video } = validatedData;
+            const updates = { title, description, year, genres, image, video };
+            const movie = await movieService.update(id, updates);
+            res.status(200).json(movie);
+        } catch (error) {
+            if (error instanceof Error)
+                return res.status(400).json({ error: (error as Error).message });
+            res.status(500).json({ message: 'Internal server error', error: (error as Error).message });
+        }
 
-    const updates = Object.fromEntries(
-        Object.entries({ title, description, year, genres, image, video })
-            .filter(([_, value]) => value !== undefined && value !== null && value !== 'any')
-    );
+    },
 
-    if (updates.title) {
-        const existing = await Movie.findOne({
-            _id: { $ne: req.params.id },
-            titleNormalized: normalize(updates.title as string)
-        });
-        if (existing)
-            return res.status(409).json({ message: 'Movie with this title already exists' });
-        updates.titleNormalized = normalize(updates.title as string);
-    }
-
-    try {
-        const updated = await Movie.findByIdAndUpdate(req.params.id, updates, { returnDocument: 'after' });
-        if (!updated)
-            return res.status(404).json({ message: 'Movie not found' });
-        res.status(200).json(updated);
-    } catch (error: any) {
-        if (error.name === 'CastError')
-            return res.status(400).json({ message: 'Invalid ID format' });
-        res.status(500).json({ message: 'Internal server error', error });
-    }
-};
-
-// Soft Delete de um filme por ID
-export const movieDelete = async (req: Request, res: Response) => {
-    try {
-        const deleted = await Movie.findByIdAndUpdate(req.params.id, {
-            isDeleted: true,
-            deletedAt: new Date()
-        }, { returnDocument: 'after' });
-        if (!deleted)
-            return res.status(404).json({ message: 'Movie not found' });
-        res.status(204).send();
-    } catch (error: any) {
-        if (error.name === 'CastError')
-            return res.status(400).json({ message: 'Invalid ID format' });
-        res.status(500).json({ message: 'Internal server error', error });
+    softDeleteMovie: async (req: Request, res: Response) => {
+        try {
+            const id = req.params.id as string;
+            if (!isValidObjectId(id))
+                return res.status(400).json({ message: 'Invalid movie ID format' });
+            await movieService.softDelete(id);
+            res.status(204).send();
+        } catch (error) {
+            if (error instanceof Error)
+                return res.status(404).json({ error: (error as Error).message });
+            res.status(500).json({ message: 'Internal server error', error: (error as Error).message });
+        }
     }
 };

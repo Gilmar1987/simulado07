@@ -1,5 +1,5 @@
 import { Router } from "express";
-import movieRouter from './movies.Router.js';
+import movieRouter from './movie.router.js';
 import userRouter from './user.router.js';
 
 

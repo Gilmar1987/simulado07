@@ -24,7 +24,7 @@ export const userRepository = {
         return await UserModel.findByIdAndUpdate(id, { isDeleted: true, deletedAt: new Date() }, { returnDocument: 'after' });
     },
     
-    list: async () => {
+    findAll: async () => {
         return await UserModel.find({});
     },
 }

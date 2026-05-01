@@ -39,5 +39,5 @@ export const deleteUserService = async (id: string) => {
 };
 
 export const listUsersService = async () => {
-    return await userRepository.list();
+    return await userRepository.findAll();
 };

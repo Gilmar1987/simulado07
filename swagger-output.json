@@ -2,11 +2,11 @@
   "swagger": "2.0",
   "info": {
     "title": "API Simulado07",
-    "description": "Documentação da API de Filmes",
+    "description": "Documentação da API de Filmes e Usuários",
     "version": "1.0.0"
   },
   "host": "localhost:3000",
-  "basePath": "/",
+  "basePath": "/api",
   "schemes": [
     "http"
   ],
@@ -14,6 +14,42 @@
     "/movies/": {
       "post": {
         "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "example": "Batman"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "Um filme sobre o Batman"
+                },
+                "year": {
+                  "type": "number",
+                  "example": 2008
+                },
+                "genres": {
+                  "type": "string",
+                  "example": "Action, Crime"
+                },
+                "image": {
+                  "type": "string",
+                  "example": "https://tmdb.org/batman.jpg"
+                },
+                "video": {
+                  "type": "string",
+                  "example": "https://youtube.com/batman"
+                }
+              }
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": "Created"
@@ -75,6 +111,40 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "example": "Batman Atualizado"
+                },
+                "description": {
+                  "type": "string",
+                  "example": "Descrição atualizada"
+                },
+                "year": {
+                  "type": "number",
+                  "example": 2009
+                },
+                "genres": {
+                  "type": "string",
+                  "example": "Action"
+                },
+                "image": {
+                  "type": "string",
+                  "example": "https://tmdb.org/batman2.jpg"
+                },
+                "video": {
+                  "type": "string",
+                  "example": "https://youtube.com/batman2"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -124,6 +194,34 @@
     "/users/": {
       "post": {
         "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "João Silva"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "joao@email.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "123456"
+                },
+                "role": {
+                  "type": "string",
+                  "example": "user"
+                }
+              }
+            }
+          }
+        ],
         "responses": {
           "201": {
             "description": "Created"
@@ -200,6 +298,32 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "João Atualizado"
+                },
+                "email": {
+                  "type": "string",
+                  "example": "joao.novo@email.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "novaSenha123"
+                },
+                "role": {
+                  "type": "string",
+                  "example": "admin"
+                }
+              }
+            }
           }
         ],
         "responses": {

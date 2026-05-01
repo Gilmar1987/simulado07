@@ -5,7 +5,8 @@ import router from './routes/index.js';
 import swaggerUi from 'swagger-ui-express';
 
 import swaggerFile from '../swagger-output.json' with { type: 'json' };
-import  connectDB from './config/dbMongo.js';
+import connectDB from './config/dbMongo.js';
+import { globalErrorHandler } from './middlewares/error.handler.js';
 
 connectDB(); // Conecta ao MongoDB
 
@@ -19,14 +20,14 @@ app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 // Rota de teste
 app.get('/', (req, res) => {
-   /* #swagger.ignore = true */
+  /* #swagger.ignore = true */
   res.redirect('/doc'); // Redireciona para a documentação do Swagger
 });
 // Importando as rotas
 
 app.use('/api', router);
 
-
+app.use(globalErrorHandler); // Middleware de tratamento global de erros
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
   //Passar data e hora atual
