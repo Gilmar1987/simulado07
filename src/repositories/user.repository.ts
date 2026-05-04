@@ -3,9 +3,10 @@ import UserModel from '../model/userModel.js';
 
 export const userRepository = {
 
-    create: async (name: string, email: string, password: string) => {
-        const newUser = new UserModel({ name, email, password });
-        return await newUser.save();
+    create: async (name: string, email: string, password: string, role?: string ) => {
+        const newUser = new UserModel({ name, email, password, role });
+        await newUser.save();
+        return await UserModel.findById(newUser._id);
     },
 
     findByEmail: async (email: string) => {
