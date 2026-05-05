@@ -1,26 +1,50 @@
-# Simulado07
+# Simulado 08
 # Autor: Gilmar Rodrigues Campelo
 
-API Node.js + Express em TypeScript para gerenciamento de filmes com persistência em MongoDB Atlas.
+API Node.js + Express em TypeScript para gerenciamento de filmes e usuários com persistência em MongoDB Atlas.
 
 ## Estrutura do projeto
 
-- `src/app.ts` - ponto de entrada da aplicação
-- `src/routes/Movies.Router.ts` - rotas da API para filmes
-- `src/controllers/Movie.Controllers.ts` - lógica de CRUD com MongoDB
-- `src/model/modelMovie.ts` - schema e model Mongoose
-- `src/config/dbMongo.ts` - conexão com o MongoDB
+```
+src/
+├── app.ts                        - ponto de entrada da aplicação
+├── config/
+│   └── dbMongo.ts                - conexão com o MongoDB
+├── routes/
+│   ├── index.ts                  - centralizador de rotas
+│   ├── movie.router.ts           - rotas da API para filmes
+│   └── user.router.ts            - rotas da API para usuários
+├── controllers/
+│   ├── movie.controllers.ts      - controller de filmes
+│   └── user.controllers.ts      - controller de usuários
+├── services/
+│   ├── movie.service.ts          - regras de negócio de filmes
+│   └── user.service.ts           - regras de negócio de usuários
+├── repositories/
+│   ├── movie.repository.ts       - acesso ao banco para filmes
+│   └── user.repository.ts        - acesso ao banco para usuários
+├── model/
+│   ├── movieModel.ts             - schema e model Mongoose de filmes
+│   └── userModel.ts              - schema e model Mongoose de usuários
+├── schemas/
+│   ├── movieSchema.ts            - validação Zod para filmes
+│   └── user.Schema.ts            - validação Zod para usuários
+└── middlewares/
+    └── error.handler.ts          - middleware global de tratamento de erros
+```
 
 ## Tecnologias
 
 - Node.js
-- Express
+- Express 5
 - TypeScript
 - tsx
 - dotenv
 - Mongoose
 - MongoDB Atlas
 - Swagger UI
+- Zod
+- bcrypt
 
 ## Instalação
 
@@ -37,7 +61,13 @@ PORT=3000
 MONGODB_URI=mongodb+srv://<usuario>:<senha>@<cluster>.mongodb.net/?appName=<appName>
 ```
 
-3. Inicie o servidor em modo desenvolvimento:
+3. Gere a documentação Swagger:
+
+```bash
+npm run swagger
+```
+
+4. Inicie o servidor em modo desenvolvimento:
 
 ```bash
 npm run dev
@@ -45,116 +75,144 @@ npm run dev
 
 O servidor deve iniciar em `http://localhost:3000`.
 
+## Arquitetura
+
+A aplicação segue o padrão de camadas:
+
+- **Controller** — recebe a requisição, valida com Zod e delega ao service
+- **Service** — contém as regras de negócio (verificação de duplicatas, hash de senha, etc.)
+- **Repository** — acesso direto ao banco de dados via Mongoose
+- **Middleware** — tratamento global de erros centralizado em `error.handler.ts`
+
+Os erros são propagados automaticamente pelo Express 5 (sem `try/catch` nos controllers) e tratados pelo `globalErrorHandler`.
+
 ## Banco de Dados
 
 - MongoDB Atlas (cloud)
 - A conexão é feita via `MONGODB_URI` definida no `.env`
 - Os dados são persistidos no banco, não se perdem ao reiniciar o servidor
-- O campo `titleNormalized` garante que títulos duplicados (ex: `Tudo Bem` e `tudobem`) sejam rejeitados
-- O campo `isDeleted` e `deletedAt` estão preparados para soft delete
 - Timestamps automáticos: `createdAt` e `updatedAt`
+
+### Model Movie
+- `title` — título original
+- `titleNormalized` — título sem espaços em maiúsculas (ex: `"Tudo Bem"` → `"TUDOBEM"`), garante unicidade independente de espaços e capitalização
+- `description`, `year`, `genres`, `image`, `video` — campos obrigatórios
+- `isDeleted` / `deletedAt` — soft delete
+- Filtragem automática de registros deletados via `pre(/^find/)`
+
+### Model User
+- `name`, `email` — campos obrigatórios
+- `password` — armazenado com hash bcrypt, `select: false` (não retornado nas queries)
+- `role` — `"user"` ou `"admin"`, padrão `"user"`
+- `isDeleted` / `deletedAt` — soft delete
+- Filtragem automática de registros deletados via `pre(/^find/)`
+
+## Validações Zod
+
+### Movie
+- `title` — string, mínimo 2 caracteres
+- `description` — string, mínimo 10 caracteres
+- `year` — número inteiro, mínimo 1888
+- `genres` — string, mínimo 5 caracteres
+- `image` — URL válida
+- `video` — URL válida
+
+### User
+- `name` — string, entre 2 e 100 caracteres
+- `email` — email válido
+- `password` — string, entre 6 e 100 caracteres
+- `role` — `"user"` ou `"admin"`, padrão `"user"`
+
+## Tratamento de Erros
+
+Centralizado em `src/middlewares/error.handler.ts`:
+
+| Situação | Status |
+|---|---|
+| Erro de validação Zod | 400 |
+| ID inválido (CastError) | 400 |
+| Duplicata no banco (código 11000) | 409 |
+| Movie/User already exists | 409 |
+| Movie/User not found | 404 |
+| Outros erros | 500 |
 
 ## Endpoints
 
 ### Documentação Swagger
 
-- `GET /` - Redireciona para a documentação Swagger UI em `/doc`
-- `GET /doc` - Documentação interativa Swagger UI
+- `GET /` — redireciona para `/doc`
+- `GET /doc` — documentação interativa Swagger UI
 
-### CRUD de filmes
+### Movies `/api/movies`
 
-As rotas são definidas em `src/routes/Movies.Router.ts` e montadas em `src/app.ts` como `/api`.
-
-- `POST /api/movies`
-  - Cria um novo filme.
-  - Body JSON esperado:
+- `POST /api/movies` — cria um novo filme
 
 ```json
 {
-  "title": "Título do filme",
-  "description": "Descrição do filme",
-  "year": 2026,
-  "genres": "Ação",
-  "image": "imagem.jpg",
-  "video": "video.mp4"
+  "title": "Batman",
+  "description": "Um filme sobre o Batman",
+  "year": 2008,
+  "genres": "Action, Crime",
+  "image": "https://tmdb.org/batman.jpg",
+  "video": "https://youtube.com/batman"
 }
 ```
 
-- `GET /api/movies`
-  - Lista todos os filmes.
+- `GET /api/movies` — lista todos os filmes (exceto deletados)
+- `GET /api/movies/:id` — retorna o filme pelo `_id`
+- `PUT /api/movies/:id` — atualiza campos do filme (envie apenas os campos a alterar)
+- `DELETE /api/movies/:id` — soft delete (marca `isDeleted: true`)
 
-- `GET /api/movies/:id`
-  - Retorna o filme com o ID informado (MongoDB `_id`).
+### Users `/api/users`
 
-- `PUT /api/movies/:id`
-  - Atualiza o filme com o ID informado.
-  - Envie apenas os campos que deseja alterar no body JSON.
+- `POST /api/users` — cria um novo usuário (senha é hasheada automaticamente)
 
-- `SOFT DELETE /api/movies/:id`
-- Remove o filme com o ID informado.
-_id
-69f127da9f28f6135325a311
-title
-"Star Wars"
-titleNormalized
-"STARWARS"
-description
-"Quando a ameaça conhecida como o Coringa surge de seu passado, ele cau…"
-year
-1977
-genres
-"Action, Crime, Drama"
-image
-"https://tmdb.org"
-video
-"https://youtube.com"
-isDeleted
-false
-# deletedAt null
-createdAt
-2026-04-28T21:34:18.854+00:00
-updatedAt
-2026-04-28T21:34:18.854+00:00
-__v
-0
-_id
-69f128349f28f6135325a312
-title
-"Star Wars O Imperio Contra Ataca"
-titleNormalized
-"STARWARSOIMPERIOCONTRAATACA"
-description
-"Quando a ameaça conhecida como o Coringa surge de seu passado, ele cau…"
-year
-1980
-genres
-"Action, Crime, Drama"
-image
-"https://tmdb.org"
-video
-"https://youtube.com"
-isDeleted
-true
-# deletedAt  2026-04-29T18:10:31.136+00:00
-createdAt
-2026-04-28T21:35:48.959+00:00
-updatedAt
-2026-04-29T18:10:31.137+00:00
-__v
-0
-  
+```json
+{
+  "name": "João Silva",
+  "email": "joao@email.com",
+  "password": "123456",
+  "role": "admin"
+}
+```
+
+- `GET /api/users` — lista todos os usuários (exceto deletados, sem senha)
+- `GET /api/users/email/:email` — busca usuário pelo email
+- `GET /api/users/:id` — busca usuário pelo `_id`
+- `PUT /api/users/:id` — atualiza campos do usuário (senha é re-hasheada se enviada)
+- `DELETE /api/users/:id` — soft delete (marca `isDeleted: true`)
 
 ## Como testar no Thunder Client
 
-1. `POST http://localhost:3000/api/movies` com body JSON para criar um filme
-2. `GET http://localhost:3000/api/movies`
-3. `GET http://localhost:3000/api/movies/:id`
-4. `PUT http://localhost:3000/api/movies/:id`
-5. `DELETE http://localhost:3000/api/movies/:id`
+**Criar filme:**
+```
+POST http://localhost:3000/api/movies
+Content-Type: application/json
+```
 
-## Teste com o Swagger
+**Criar usuário admin:**
+```
+POST http://localhost:3000/api/users
+Content-Type: application/json
+body: { "name": "Admin", "email": "admin@email.com", "password": "123456", "role": "admin" }
+```
 
-Acesse `http://localhost:3000/doc` para abrir a documentação Swagger UI e testar os endpoints interativamente.
+**Atualizar senha:**
+```
+PUT http://localhost:3000/api/users/:id
+Content-Type: application/json
+body: { "password": "novaSenha123" }
+```
+
+## Swagger
+
+Acesse `http://localhost:3000/doc` para testar os endpoints interativamente.
+
+Para regenerar a documentação após alterações nas rotas:
+
+```bash
+npm run swagger
+```
 
 ## Curl
 
@@ -166,6 +224,8 @@ curl -X 'GET' \
 
 ## Observações
 
-- Os dados são persistidos no MongoDB Atlas.
-- A aplicação usa módulos ES (`"type": "module"` no `package.json`).
-- O arquivo `.env` não deve ser commitado. Use `.env.exemplo` como referência.
+- Os dados são persistidos no MongoDB Atlas
+- A aplicação usa módulos ES (`"type": "module"` no `package.json`)
+- O arquivo `.env` não deve ser commitado — use `.env.exemplo` como referência
+- Express 5 propaga erros de funções `async` automaticamente para o middleware global
+- A senha nunca é retornada nas respostas da API (`select: false` no schema)

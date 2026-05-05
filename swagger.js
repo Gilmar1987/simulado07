@@ -2,7 +2,7 @@ import swaggerAutogen from 'swagger-autogen';
 
 const doc = {
   info: {
-    title: 'API Simulado07',
+    title: 'API Simulado 08',
     description: 'Documentação da API de Filmes e Usuários',
   },
   host: 'localhost:3000',

@@ -31,9 +31,13 @@ export const updateUserService = async (id: string, updates: Partial<{
     const existingUser = await userRepository.findById(id);
     if (!existingUser)
         throw new Error('User not found');
-    const existingEmail = await userRepository.findByEmail(updates.email as string)
-    if (existingEmail && existingEmail._id.toString() !== id)
-        throw new Error('Email already exists');
+    if (updates.email) {
+        const existingEmail = await userRepository.findByEmail(updates.email);
+        if (existingEmail && existingEmail._id.toString() !== id)
+            throw new Error('Email already exists');
+    }
+    if (updates.password)
+        updates.password = await bcrypt.hash(updates.password, 10);
     return await userRepository.update(id, updates);
 };
 

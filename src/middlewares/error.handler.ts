@@ -33,25 +33,15 @@ export const globalErrorHandler = (
             message: 'Duplicate field value entered'
         });
     }
-    // Captura erros lançados manualmente (ex: throw new Error('User already exists'))
-    if (err.message === 'User already exists' || err.statusCode === 409) {
-        return res.status(409).json({
-            message: err.message
-        });
-    }
+    // Erros de regra de negócio
+    const conflictMessages = ['User already exists', 'Email already exists', 'Movie already exists'];
+    const notFoundMessages = ['User not found', 'Movie not found'];
 
-    if(err.message === 'Email already exists'){
-        return res.status(409).json({
-            message: err.message
-        });
-    }
+    if (conflictMessages.includes(err.message) || err.statusCode === 409)
+        return res.status(409).json({ message: err.message });
 
-    // Email inesistente / Id inesistente
-    if (err.message === 'User not found') {
-        return res.status(404).json({
-            message: err.message
-        });
-    }
+    if (notFoundMessages.includes(err.message))
+        return res.status(404).json({ message: err.message });
 
 
 

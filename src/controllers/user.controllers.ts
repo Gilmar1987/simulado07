@@ -12,7 +12,7 @@ import {
 
 
 export const userController = {
-    createUser: async (req: Request, res: Response) => {
+    createUserController: async (req: Request, res: Response) => {
 
         const { name, email, password, role } = userSchema.parse(req.body);
         const user = await createUserService(name, email, password, role);
@@ -20,14 +20,14 @@ export const userController = {
 
     },
 
-    getAllUsers: async (req: Request, res: Response) => {
+    getAllUsersController: async (req: Request, res: Response) => {
 
         const users = await listUsersService();
         res.status(200).json(users);
 
     },
 
-    getByEmailUser: async (req: Request, res: Response) => {
+    getByEmailUserController: async (req: Request, res: Response) => {
 
 
         const email = userSchema.shape.email.parse(req.params.email);
@@ -37,7 +37,7 @@ export const userController = {
 
     },
 
-    getByIdUser: async (req: Request, res: Response) => {
+    getByIdUserController: async (req: Request, res: Response) => {
 
         const id = req.params.id as string;
         if (!isValidObjectId(id))
@@ -49,7 +49,7 @@ export const userController = {
 
     },
 
-    updateUser: async (req: Request, res: Response) => {
+    updateUserController: async (req: Request, res: Response) => {
         // #swagger.parameters['body'] = { schema: { $ref: '#/definitions/User' } }
 
         const id = req.params.id as string;
@@ -62,7 +62,7 @@ export const userController = {
 
     },
 
-    deleteUser: async (req: Request, res: Response) => {
+    deleteUserController: async (req: Request, res: Response) => {
 
         const id = req.params.id as string;
         if (!isValidObjectId(id))

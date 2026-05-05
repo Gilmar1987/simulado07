@@ -11,9 +11,16 @@ import Movie from '../model/movieModel.js';
     */
 
 export const movieRepository = {
+    
+   
     create: async (title: string, description: string, year: number, genres: string, image: string, video: string) => {
-        const newMovie = new Movie({ title, description, year, genres, image, video });
+        const titleNormalized = title.toUpperCase().replace(/\s+/g, '');
+        const newMovie = new Movie({ title, titleNormalized, description, year, genres, image, video });
         return await newMovie.save();
+    },
+
+    findByTitleNormalized:  async (titleNormalized: string) =>{
+        return await Movie.findOne({ titleNormalized });
     },
 
     findAll: async () => {

@@ -3,23 +3,27 @@ import { movieRepository } from '../repositories/movie.repository.js';
 
 export const movieService = {
 
-    create: async (title: string, description: string, year: number,
+    createMovieService: async (title: string, description: string, year: number,
         genres: string, image: string, video: string) => {
+            const titleNormalized = title.toUpperCase().replace(/\s+/g, '');
+            const existingMovie = await movieRepository.findByTitleNormalized(titleNormalized);
+            if (existingMovie)
+                throw new Error('Movie already exists');
         return await movieRepository.create(title, description, year, genres, image, video);
     },
 
-    getAll: async () => {
+    getAllMoviesService: async () => {
         return await movieRepository.findAll();
     },
 
-    getById: async (id: string) => {
+    getMovieByIdService: async (id: string) => {
         const movie = await movieRepository.findById(id);
         if (!movie)
             throw new Error('Movie not found');
         return movie;
     },
 
-    update: async (id: string, updates: Partial<{
+    updateMovieService: async (id: string, updates: Partial<{
         title: string; description: string;
         year: number; genres: string; image: string; video: string
     }>) => {
@@ -29,7 +33,7 @@ export const movieService = {
         return await movieRepository.update(id, updates);
     },
 
-    softDelete: async (id: string) => {
+    softDeleteMovieService: async (id: string) => {
         const existingMovie = await movieRepository.findById(id);
         if (!existingMovie)
             throw new Error('Movie not found');
