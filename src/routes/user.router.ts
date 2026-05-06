@@ -3,6 +3,7 @@ import { userController } from '../controllers/user.controllers.js';
 
 const router = Router();
 
+router.post('/login', userController.loginUserController);
 router.post('/', userController.createUserController);
 router.get('/', userController.getAllUsersController);
 router.get('/email/:email', userController.getByEmailUserController);

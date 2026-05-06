@@ -10,6 +10,9 @@ import {
     updateUserService
 } from '../services/user.service.js';
 
+import { loginUser } from '../services/user.service.js';
+
+
 
 export const userController = {
     createUserController: async (req: Request, res: Response) => {
@@ -72,4 +75,15 @@ export const userController = {
         res.status(204).send();
 
     },
+
+    loginUserController: async (req: Request, res: Response) => {
+        /*  #swagger.parameters['body'] = {
+                in: 'body',
+                required: true,
+                schema: { email: 'joao@email.com', password: '123456' }
+            } */
+        const { email, password, } = userSchema.pick({ email: true, password: true }).parse(req.body);
+        const { token } = await loginUser(email, password);
+        res.status(200).json({ token });
+    }
 };

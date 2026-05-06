@@ -7,13 +7,16 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerFile from '../swagger-output.json' with { type: 'json' };
 import connectDB from './config/dbMongo.js';
 import { globalErrorHandler } from './middlewares/error.handler.js';
+import cors from 'cors';
 
 connectDB(); // Conecta ao MongoDB
 
 const app = express();
+//.use(cors());
+app.use(cors({ origin: 'http://localhost:3001' }));
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 // 1. Configuração da Rota do Swagger
 // Acesse http://localhost:3000/doc para testar os endpoints
 app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile));

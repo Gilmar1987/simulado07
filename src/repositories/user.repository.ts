@@ -13,6 +13,10 @@ export const userRepository = {
         return await UserModel.findOne({ email });
     },
 
+    findByEmailWithPassword: async (email: string) => {
+        return await UserModel.findOne({ email }).select('+password');
+    },
+
     findById: async (id: string) => {
         return await UserModel.findById(id);
     },

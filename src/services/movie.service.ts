@@ -39,4 +39,6 @@ export const movieService = {
             throw new Error('Movie not found');
         return await movieRepository.softDelete(id);
     },
+
+   
 };
