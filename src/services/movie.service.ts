@@ -12,8 +12,10 @@ export const movieService = {
         return await movieRepository.create(title, description, year, genres, image, video);
     },
 
-    getAllMoviesService: async () => {
-        return await movieRepository.findAll();
+    getAllMoviesService: async (page:number = 1, limit: number = 9) => {
+        const skip = (page - 1) * limit;
+        
+        return await movieRepository.findAll(skip, limit);
     },
 
     getMovieByIdService: async (id: string) => {
