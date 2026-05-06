@@ -16,6 +16,13 @@ import { loginUser } from '../services/user.service.js';
 
 export const userController = {
     createUserController: async (req: Request, res: Response) => {
+        
+        
+        /*  #swagger.parameters['body'] = {
+                in: 'body',
+                required: true,
+                schema: { name: 'João', email: 'joao@email.com', password: '123456', role: 'user' }
+            } */
 
         const { name, email, password, role } = userSchema.parse(req.body);
         const user = await createUserService(name, email, password, role);
@@ -53,7 +60,12 @@ export const userController = {
     },
 
     updateUserController: async (req: Request, res: Response) => {
-        // #swagger.parameters['body'] = { schema: { $ref: '#/definitions/User' } }
+        
+        /*  #swagger.parameters['body'] = {
+                in: 'body',
+                required: true,
+                schema: { name: 'João', email: 'joao@email.com', password: '123456', role: 'user' }
+            } */
 
         const id = req.params.id as string;
         if (!isValidObjectId(id))

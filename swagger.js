@@ -7,6 +7,15 @@ const doc = {
   },
   host: 'localhost:3000',
   basePath: '/api',
+  securityDefinitions: {
+    bearerAuth: {
+      type: 'apiKey',
+      in: 'header',
+      name: 'Authorization',
+      description: 'Informe o token JWT no formato: Bearer <token>'
+    }
+  },
+  security: [{ bearerAuth: [] }],
 };
 
 const outputFile = './swagger-output.json';
