@@ -1,4 +1,4 @@
-# Simulado 08
+# Simulado07
 # Autor: Gilmar Rodrigues Campelo
 
 API Node.js + Express em TypeScript para gerenciamento de filmes e usuários com persistência em MongoDB Atlas.
@@ -29,8 +29,12 @@ src/
 ├── schemas/
 │   ├── movieSchema.ts            - validação Zod para filmes
 │   └── user.Schema.ts            - validação Zod para usuários
-└── middlewares/
-    └── error.handler.ts          - middleware global de tratamento de erros
+├── middlewares/
+│   ├── auth.middleware.ts        - verificação do token JWT
+│   ├── role.middleware.ts        - verificação de permissão por role
+│   └── error.handler.ts          - middleware global de tratamento de erros
+└── types/
+    └── express.d.ts              - extensão do tipo Request do Express
 ```
 
 ## Tecnologias
@@ -45,6 +49,7 @@ src/
 - Swagger UI
 - Zod
 - bcrypt
+- jsonwebtoken (JWT)
 
 ## Instalação
 
@@ -59,6 +64,8 @@ npm install
 ```bash
 PORT=3000
 MONGODB_URI=mongodb+srv://<usuario>:<senha>@<cluster>.mongodb.net/?appName=<appName>
+JWT_SECRET=sua_chave_secreta
+JWT_EXPIRES_IN=1d
 ```
 
 3. Gere a documentação Swagger:
@@ -80,11 +87,29 @@ O servidor deve iniciar em `http://localhost:3000`.
 A aplicação segue o padrão de camadas:
 
 - **Controller** — recebe a requisição, valida com Zod e delega ao service
-- **Service** — contém as regras de negócio (verificação de duplicatas, hash de senha, etc.)
+- **Service** — contém as regras de negócio (verificação de duplicatas, hash de senha, geração de token, etc.)
 - **Repository** — acesso direto ao banco de dados via Mongoose
-- **Middleware** — tratamento global de erros centralizado em `error.handler.ts`
+- **Middleware** — autenticação JWT, controle de roles e tratamento global de erros
 
 Os erros são propagados automaticamente pelo Express 5 (sem `try/catch` nos controllers) e tratados pelo `globalErrorHandler`.
+
+## Autenticação e Autorização
+
+- Autenticação via **JWT** (JSON Web Token)
+- O token é gerado no login e deve ser enviado no header `Authorization: Bearer <token>`
+- O token contém `id`, `email` e `role` do usuário
+- Expiração configurável via `JWT_EXPIRES_IN` no `.env`
+
+### Controle de Acesso por Role
+
+| Endpoint | Role necessário |
+|---|---|
+| `POST /api/movies` | `user` ou `admin` |
+| `GET /api/movies` | `user` ou `admin` |
+| `GET /api/movies/:id` | `user` ou `admin` |
+| `PUT /api/movies/:id` | `admin` |
+| `DELETE /api/movies/:id` | `admin` |
+| Endpoints de usuários | público |
 
 ## Banco de Dados
 
@@ -132,8 +157,11 @@ Centralizado em `src/middlewares/error.handler.ts`:
 | Erro de validação Zod | 400 |
 | ID inválido (CastError) | 400 |
 | Duplicata no banco (código 11000) | 409 |
-| Movie/User already exists | 409 |
+| Movie/User/Email already exists | 409 |
 | Movie/User not found | 404 |
+| Token não fornecido | 401 |
+| Token inválido | 401 |
+| Permissão insuficiente | 403 |
 | Outros erros | 500 |
 
 ## Endpoints
@@ -141,11 +169,29 @@ Centralizado em `src/middlewares/error.handler.ts`:
 ### Documentação Swagger
 
 - `GET /` — redireciona para `/doc`
-- `GET /doc` — documentação interativa Swagger UI
+- `GET /doc` — documentação interativa Swagger UI com suporte a Bearer token
+
+### Auth
+
+- `POST /api/users/login` — autentica o usuário e retorna o token JWT
+
+```json
+{
+  "email": "admin@email.com",
+  "password": "123456"
+}
+```
+
+Resposta:
+```json
+{ "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." }
+```
 
 ### Movies `/api/movies`
 
-- `POST /api/movies` — cria um novo filme
+> Todas as rotas de filmes requerem token JWT no header `Authorization: Bearer <token>`
+
+- `POST /api/movies` — cria um novo filme (`user` ou `admin`)
 
 ```json
 {
@@ -158,10 +204,11 @@ Centralizado em `src/middlewares/error.handler.ts`:
 }
 ```
 
-- `GET /api/movies` — lista todos os filmes (exceto deletados)
-- `GET /api/movies/:id` — retorna o filme pelo `_id`
-- `PUT /api/movies/:id` — atualiza campos do filme (envie apenas os campos a alterar)
-- `DELETE /api/movies/:id` — soft delete (marca `isDeleted: true`)
+- `GET /api/movies` — lista filmes com paginação (`user` ou `admin`)
+  - Query params: `?page=1&limit=9`
+- `GET /api/movies/:id` — retorna o filme pelo `_id` (`user` ou `admin`)
+- `PUT /api/movies/:id` — atualiza campos do filme, apenas `admin`
+- `DELETE /api/movies/:id` — soft delete, apenas `admin`
 
 ### Users `/api/users`
 
@@ -180,21 +227,27 @@ Centralizado em `src/middlewares/error.handler.ts`:
 - `GET /api/users/email/:email` — busca usuário pelo email
 - `GET /api/users/:id` — busca usuário pelo `_id`
 - `PUT /api/users/:id` — atualiza campos do usuário (senha é re-hasheada se enviada)
-- `DELETE /api/users/:id` — soft delete (marca `isDeleted: true`)
+- `DELETE /api/users/:id` — soft delete
 
 ## Como testar no Thunder Client
 
-**Criar filme:**
+**Login:**
 ```
-POST http://localhost:3000/api/movies
+POST http://localhost:3000/api/users/login
 Content-Type: application/json
+body: { "email": "admin@email.com", "password": "123456" }
 ```
 
-**Criar usuário admin:**
+**Usar token nas rotas protegidas:**
 ```
-POST http://localhost:3000/api/users
+Authorization: Bearer <token>
+```
+
+**Criar filme (requer token):**
+```
+POST http://localhost:3000/api/movies
+Authorization: Bearer <token>
 Content-Type: application/json
-body: { "name": "Admin", "email": "admin@email.com", "password": "123456", "role": "admin" }
 ```
 
 **Atualizar senha:**
@@ -208,6 +261,9 @@ body: { "password": "novaSenha123" }
 
 Acesse `http://localhost:3000/doc` para testar os endpoints interativamente.
 
+- Clique em **Authorize** 🔒 e informe o token no formato `Bearer <token>`
+- Schemas disponíveis: `Movie`, `MovieUpdate`, `User`, `UserUpdate`, `Login`
+
 Para regenerar a documentação após alterações nas rotas:
 
 ```bash
@@ -219,7 +275,8 @@ npm run swagger
 ```bash
 curl -X 'GET' \
   'http://localhost:3000/api/movies' \
-  -H 'accept: application/json'
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer <token>'
 ```
 
 ## Observações
@@ -229,3 +286,4 @@ curl -X 'GET' \
 - O arquivo `.env` não deve ser commitado — use `.env.exemplo` como referência
 - Express 5 propaga erros de funções `async` automaticamente para o middleware global
 - A senha nunca é retornada nas respostas da API (`select: false` no schema)
+- O token JWT expira conforme configurado em `JWT_EXPIRES_IN` no `.env`

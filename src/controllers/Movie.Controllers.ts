@@ -29,7 +29,7 @@ export const movieController = {
         const limit = parseInt(req.query.limit as string) || 9;
         const movies = await movieService.getAllMoviesService(page, limit);
         
-        //const movies = await movieService.getAllMoviesService();
+       
         res.status(200).json(movies);
     },
 

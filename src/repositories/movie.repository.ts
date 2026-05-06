@@ -25,7 +25,7 @@ export const movieRepository = {
 
     findAll: async (skip:number , limit:number) => {
         return await Movie.find().skip(skip).limit(limit);
-        //return await Movie.find();
+       
     },
     findById: async (id: string) => {
         return await Movie.findById(id);
