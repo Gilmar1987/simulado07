@@ -99,6 +99,9 @@ dist
 # Sveltekit cache directory
 .svelte-kit/
 
+# Pasta de testes
+src/testes/
+
 # vitepress build output
 **/.vitepress/dist
 
@@ -142,3 +145,6 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+#Teste unitário
+src/testes/

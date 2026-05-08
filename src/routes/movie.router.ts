@@ -1,6 +1,6 @@
 //Rotas para os endpoints da API
 import { Router } from 'express';
-import { movieController } from '../controllers/movie.controllers.js';
+import { movieController } from '../controllers/Movie.Controllers.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
 import { roleMiddleware } from '../middlewares/role.middleware.js';
 

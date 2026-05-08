@@ -59,7 +59,13 @@ src/
 npm install
 ```
 
-2. Configure as variáveis de ambiente criando um arquivo `.env` na raiz do projeto (use `.env.exemplo` como base):
+2. Execute os testes:
+
+```bash
+npm test
+```
+
+3. Configure as variáveis de ambiente criando um arquivo `.env` na raiz do projeto (use `.env.example` como base):
 
 ```bash
 PORT=3000
@@ -279,11 +285,88 @@ curl -X 'GET' \
   -H 'Authorization: Bearer <token>'
 ```
 
+## Integração com Frontend Next.js
+
+### Login e armazenamento do token
+
+No Next.js, faça o login enviando o email e senha para `POST /api/users/login`. Em seguida, guarde o token em `localStorage` ou em um cookie seguro.
+
+```ts
+// services/auth.ts
+export async function login(email: string, password: string) {
+  const response = await fetch('http://localhost:3000/api/users/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || 'Falha no login');
+  }
+
+  localStorage.setItem('token', data.token);
+  return data.token;
+}
+```
+
+### Requisições autenticadas
+
+Use o token armazenado para enviar o header `Authorization` nas chamadas às rotas protegidas.
+
+```ts
+// services/api.ts
+export async function fetchMovies(page = 1, limit = 9) {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`http://localhost:3000/api/movies?page=${page}&limit=${limit}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return await response.json();
+}
+```
+
+### Exemplo de página Next.js
+
+```tsx
+// app/page.tsx
+'use client';
+import { useEffect, useState } from 'react';
+import { fetchMovies } from '../services/api';
+
+export default function Home() {
+  const [movies, setMovies] = useState([]);
+
+  useEffect(() => {
+    async function load() {
+      const data = await fetchMovies();
+      setMovies(data);
+    }
+    load();
+  }, []);
+
+  return (
+    <main>
+      <h1>Filmes</h1>
+      <ul>
+        {movies.map((movie: any) => (
+          <li key={movie._id}>{movie.title}</li>
+        ))}
+      </ul>
+    </main>
+  );
+}
+```
+
+> Observação: para proteger melhor o token em produção, prefira cookies HTTP-only com CSRF ou autenticação via servidor.
+
 ## Observações
 
 - Os dados são persistidos no MongoDB Atlas
 - A aplicação usa módulos ES (`"type": "module"` no `package.json`)
-- O arquivo `.env` não deve ser commitado — use `.env.exemplo` como referência
+- O arquivo `.env` não deve ser commitado — use `.env.example` como referência
 - Express 5 propaga erros de funções `async` automaticamente para o middleware global
 - A senha nunca é retornada nas respostas da API (`select: false` no schema)
 - O token JWT expira conforme configurado em `JWT_EXPIRES_IN` no `.env`

@@ -26,8 +26,8 @@ export const movieController = {
 
     getAllMoviesController: async (req: Request, res: Response) => {
         const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 9;
-        const movies = await movieService.getAllMoviesService(page, limit);
+        const limit = parseInt(req.query.limit as string) || 12;
+        const movies  = await movieService.getAllMoviesService(page, limit);
         
        
         res.status(200).json(movies);

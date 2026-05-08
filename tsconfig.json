@@ -13,6 +13,8 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
+    "types": ["jest"],
+    "isolatedModules": true,
     "outDir": "./dist",
     "rootDir": "./src"
   },

@@ -1,4 +1,4 @@
-import {Query, Schema, model} from 'mongoose';
+import { Query, Schema, model, InferSchemaType } from 'mongoose';
 
 const userSchema = new Schema({
     name: {
@@ -35,4 +35,5 @@ userSchema.pre(/^find/, function(this: Query<any, any>) {
 });
 
 const UserModel = model('User', userSchema);
+export type UserType = InferSchemaType<typeof userSchema>;
 export default UserModel;

@@ -12,10 +12,16 @@ export const movieService = {
         return await movieRepository.create(title, description, year, genres, image, video);
     },
 
-    getAllMoviesService: async (page:number = 1, limit: number = 9) => {
+    getAllMoviesService: async (page: number = 1, limit: number = 12) => {
         const skip = (page - 1) * limit;
-        
-        return await movieRepository.findAll(skip, limit);
+        const { movies, total } = await movieRepository.findAll(skip, limit);
+        return {
+            movies,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit)
+        };
     },
 
     getMovieByIdService: async (id: string) => {
